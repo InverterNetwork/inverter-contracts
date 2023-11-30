@@ -5,9 +5,15 @@ import {ERC2771ContextUpgradeable} from
     "@oz-up/metatx/ERC2771ContextUpgradeable.sol";
 
 abstract contract TransactionSupport is ERC2771ContextUpgradeable {
+    address public multicall;
+
     constructor(address _trustedForwarder)
         ERC2771ContextUpgradeable(_trustedForwarder)
     {}
+
+    function setMulticallContract(address _multicall) public {
+        multicall = _multicall;
+    }
 
     function _msgSender()
         internal
@@ -16,6 +22,13 @@ abstract contract TransactionSupport is ERC2771ContextUpgradeable {
         override
         returns (address sender)
     {
-        return super._msgSender();
+        if (msg.sender == multicall) {
+            /// @solidity memory-safe-assembly
+            assembly {
+                sender := shr(96, calldataload(sub(calldatasize(), 20)))
+            }
+        } else {
+            return super._msgSender();
+        }
     }
 }
