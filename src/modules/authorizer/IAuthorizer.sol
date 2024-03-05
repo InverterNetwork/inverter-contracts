@@ -23,8 +23,9 @@ interface IAuthorizer is IAccessControlEnumerable {
     /// @notice Asks whether an address holds the required module role to execute
     ///         the current transaction.
     /// @param role The identifier of the role we want to check
-    /// @param who  The address on which to perform the check.
+    /// @param who  The address on which to perform the check. 
     /// @dev It will use the calling address to generate the role ID. Therefore, for checking on anything other than itself, hasRole() should be used
+    /// @return hasModuleRole Bool indicating whether the address holds the role
     function hasModuleRole(bytes32 role, address who)
         external
         view
@@ -33,6 +34,7 @@ interface IAuthorizer is IAccessControlEnumerable {
     /// @notice Helper function to generate a bytes32 role hash for a module role
     /// @param module The address of the module to generate the hash for
     /// @param role  The ID number of the role to generate the hash for
+    /// @return roleId The ID of the role for a module.
     function generateRoleId(address module, bytes32 role)
         external
         returns (bytes32);
@@ -73,10 +75,10 @@ interface IAuthorizer is IAccessControlEnumerable {
     function revokeGlobalRole(bytes32 role, address target) external;
 
     /// @notice Returns the role ID of the owner role
-    /// @return The role ID
+    /// @return ownerRoleId The owner role ID
     function getOwnerRole() external view returns (bytes32);
 
     /// @notice Returns the role ID of the manager role
-    /// @return The role ID
+    /// @return managerRoleId The manager role ID
     function getManagerRole() external view returns (bytes32);
 }
