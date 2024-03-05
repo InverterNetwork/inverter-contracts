@@ -4,6 +4,9 @@ pragma solidity ^0.8.0;
 import {IERC20PaymentClient} from
     "src/modules/logicModule/paymentClient/IERC20PaymentClient.sol";
 
+/// @notice A module for managing bounties
+/// @custom:version 1.0
+/// @custom:moduletype logicModule
 interface IBountyManager is IERC20PaymentClient {
     //--------------------------------------------------------------------------
     // Types
@@ -136,6 +139,7 @@ interface IBountyManager is IERC20PaymentClient {
     /// @notice Returns the Bounty instance with id `id`.
     /// @param bountyId The id of the Bounty to return.
     /// @return Bounty with id `id`.
+    /// @custom:tags minimumPayoutAmount:decimal maximumPayoutAmount:decimal details:any(string)
     function getBountyInformation(uint bountyId)
         external
         view
@@ -143,17 +147,18 @@ interface IBountyManager is IERC20PaymentClient {
 
     /// @notice Returns total list of Bounty ids.
     /// @dev List is in ascending order.
-    /// @return List of Bounty ids.
+    /// @return bountyIds List of Bounty ids.
     function listBountyIds() external view returns (uint[] memory);
 
     /// @notice Returns whether Bounty with id `id` exists.
     /// @param bountyId The id of the Bounty to test.
-    /// @return True if Claim with id `id` exists, false otherwise.
+    /// @return isExistingBountyId True if Claim with id `id` exists, false otherwise.
     function isExistingBountyId(uint bountyId) external view returns (bool);
 
     /// @notice Returns the Claim instance with id `id`.
     /// @param claimId The id of the Claim to return.
-    /// @return Claim with id `id`.
+    /// @return claim Claim with id `id`.
+    /// @custom:tags claimAmount:decimal details:any(string)
     function getClaimInformation(uint claimId)
         external
         view
@@ -161,19 +166,19 @@ interface IBountyManager is IERC20PaymentClient {
 
     /// @notice Returns total list of Claim ids.
     /// @dev List is in ascending order.
-    /// @return List of Claim ids.
+    /// @return claimIds List of Claim ids.
     function listClaimIds() external view returns (uint[] memory);
 
     /// @notice Returns whether Claim with id `id` exists.
     /// @param claimId The id of the Bounty to test.
-    /// @return True if Claim with id `id` exists, false otherwise.
+    /// @return isExistingBountyId True if Claim with id `id` exists, false otherwise.
     function isExistingClaimId(uint claimId) external view returns (bool);
 
     /// @notice Returns a list of Claim ids in which contributor Address is used.
     /// @dev List is in ascending order.
     /// @dev Returns an empty .
     /// @param contributorAddrs claim ids are filtered by the contributor address
-    /// @return List of Claim ids.
+    /// @return claimIds List of Claim ids.
     function listClaimIdsForContributorAddress(address contributorAddrs)
         external
         view
@@ -187,7 +192,8 @@ interface IBountyManager is IERC20PaymentClient {
     /// @param minimumPayoutAmount The minimum amount of tokens the Bounty will pay out upon being claimed
     /// @param maximumPayoutAmount The maximum amount of tokens the Bounty will pay out upon being claimed
     /// @param details The Bounty's details.
-    /// @return The newly added Bounty's id.
+    /// @return bountyId The newly added Bounty's id.
+    /// @custom:tags minimumPayoutAmount:decimal maximumPayoutAmount:decimal details:any(string)
     function addBounty(
         uint minimumPayoutAmount,
         uint maximumPayoutAmount,
@@ -198,6 +204,7 @@ interface IBountyManager is IERC20PaymentClient {
     /// @dev Reverts if an argument invalid.
     /// @param bountyId The id of the Bounty that will be updated.
     /// @param details The Bounty's details.
+    /// @custom:tags details:any(string)
     function updateBounty(uint bountyId, bytes calldata details) external;
 
     /// @notice Locks the Bounty so it cant be claimed.
@@ -210,7 +217,8 @@ interface IBountyManager is IERC20PaymentClient {
     /// @dev Reverts if an argument invalid.
     /// @param contributors The contributor information for the Claim
     /// @param details The Claim's details.
-    /// @return The newly added Claim's id.
+    /// @return claimId The newly added Claim's id.
+    /// @custom:tags claimAmount:decimal details:any(string)
     function addClaim(
         uint bountyId,
         Contributor[] calldata contributors,
@@ -221,6 +229,7 @@ interface IBountyManager is IERC20PaymentClient {
     /// @dev Reverts if an argument invalid.
     /// @param claimId The id of the Claim that will be updated.
     /// @param contributors The contributor information for the Claim.
+    /// @custom:tags claimAmount:decimal
     function updateClaimContributors(
         uint claimId,
         Contributor[] calldata contributors
@@ -229,6 +238,7 @@ interface IBountyManager is IERC20PaymentClient {
     /// @notice Updates a Claim Details.
     /// @param claimId The id of the Claim that will be updated.
     /// @param details The Claim's details.
+    /// @custom:tags details:any(string)
     function updateClaimDetails(uint claimId, bytes calldata details)
         external;
 
@@ -238,6 +248,7 @@ interface IBountyManager is IERC20PaymentClient {
     /// @dev contributors should be copied out of the given Claim. The parameter is used to prevent front running.
     /// @param claimId The id of the Claim that wants to claim the Bounty.
     /// @param contributors The contributor information for the Claim.
+    /// @custom:tags claimAmount:decimal
     function verifyClaim(uint claimId, Contributor[] calldata contributors)
         external;
 }
