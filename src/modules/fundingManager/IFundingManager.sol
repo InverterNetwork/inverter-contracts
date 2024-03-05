@@ -44,7 +44,12 @@ interface IFundingManager {
     //--------------------------------------------------------------------------
     // Functions
 
+    /// @notice Returns the IERC20 token of the funding manager.
     function token() external view returns (IERC20);
 
+    /// @notice Transfers the orchestrator token to a specific address.
+    /// @param to The destination address of the transfer.
+    /// @param amount The amount that is being sent.
+    ///  @custom:tags amount:decimal
     function transferOrchestratorToken(address to, uint amount) external;
 }
