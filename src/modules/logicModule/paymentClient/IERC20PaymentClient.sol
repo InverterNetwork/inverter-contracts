@@ -50,17 +50,22 @@ interface IERC20PaymentClient {
     // Functions
 
     /// @notice Returns the list of outstanding payment orders.
+    /// @return paymentOrders List of outstanding payment orders.
+    /// @custom:tags amount:decimal
     function paymentOrders() external view returns (PaymentOrder[] memory);
 
     /// @notice Returns the total outstanding token payment amount.
+    /// @return outstandingTokenAmount Total outstanding token payment amount.
+    /// @custom:tags outstandingTokenAmount:decimal
     function outstandingTokenAmount() external view returns (uint);
 
     /// @notice Collects outstanding payment orders.
     /// @dev Marks the orders as completed for the client.
     ///      The responsibility to fulfill the orders are now in the caller's
     ///      hand!
-    /// @return list of payment orders
-    /// @return total amount of token to pay
+    /// @return paymentOrders list of payment orders
+    /// @return outstandingTokenAmount total amount of token to pay
+    /// @custom:tags amount:decimal outstandingTokenAmount:decimal
     function collectPaymentOrders()
         external
         returns (PaymentOrder[] memory, uint);
@@ -69,5 +74,6 @@ interface IERC20PaymentClient {
     /// @dev Payment Client will reduce the total amount of tokens it will stock up by the given amount
     /// This has to be called by a paymentProcessor
     /// @param amount amount of tokens that have been paid out
+    /// @custom:tags amount:decimal
     function amountPaid(uint amount) external;
 }
