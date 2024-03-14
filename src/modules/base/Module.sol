@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity 0.8.23;
 
 // External Dependencies
 import {Initializable} from "@oz-up/proxy/utils/Initializable.sol";
@@ -288,6 +288,52 @@ abstract contract Module is
             return this.decoder(dependencyData);
         } catch {
             return false;
+        }
+    }
+
+    //--------------------------------------------------------------------------
+    // ERC2771 Context Upgradeable
+    // @dev We imitate here the EIP2771 Standard to enable metatransactions
+    // As it currently stands we dont want to feed the forwarder address to each module individually and we decided to move this to the orchestrator
+
+    function isTrustedForwarder(address forwarder)
+        public
+        view
+        virtual
+        returns (bool)
+    {
+        return __Module_orchestrator.isTrustedForwarder(forwarder);
+    }
+
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable)
+        returns (address sender)
+    {
+        if (__Module_orchestrator.isTrustedForwarder(msg.sender)) {
+            // The assembly code is more direct than the Solidity version using `abi.decode`.
+            /// @solidity memory-safe-assembly
+            assembly {
+                sender := shr(96, calldataload(sub(calldatasize(), 20)))
+            }
+        } else {
+            return super._msgSender();
+        }
+    }
+
+    function _msgData()
+        internal
+        view
+        virtual
+        override(ContextUpgradeable)
+        returns (bytes calldata)
+    {
+        if (__Module_orchestrator.isTrustedForwarder(msg.sender)) {
+            return msg.data[:msg.data.length - 20];
+        } else {
+            return super._msgData();
         }
     }
 }
