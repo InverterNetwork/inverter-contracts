@@ -138,8 +138,7 @@ interface IBountyManager is IERC20PaymentClient {
 
     /// @notice Returns the Bounty instance with id `id`.
     /// @param bountyId The id of the Bounty to return.
-    /// @return Bounty with id `id`.
-    /// @custom:tags minimumPayoutAmount:decimal maximumPayoutAmount:decimal details:any(string)
+    /// @return bounty Bounty with id `id`. tags:[minimumPayoutAmount:decimals, maximumPayoutAmount:decimals, details:any]
     function getBountyInformation(uint bountyId)
         external
         view
@@ -157,8 +156,7 @@ interface IBountyManager is IERC20PaymentClient {
 
     /// @notice Returns the Claim instance with id `id`.
     /// @param claimId The id of the Claim to return.
-    /// @return claim Claim with id `id`.
-    /// @custom:tags claimAmount:decimal details:any(string)
+    /// @return claim Claim with id `id`. tags:[claimAmount:decimals, details:any]
     function getClaimInformation(uint claimId)
         external
         view
@@ -189,11 +187,10 @@ interface IBountyManager is IERC20PaymentClient {
 
     /// @notice Adds a new Bounty.
     /// @dev Reverts if an argument invalid.
-    /// @param minimumPayoutAmount The minimum amount of tokens the Bounty will pay out upon being claimed
-    /// @param maximumPayoutAmount The maximum amount of tokens the Bounty will pay out upon being claimed
-    /// @param details The Bounty's details.
+    /// @param minimumPayoutAmount The minimum amount of tokens the Bounty will pay out upon being claimed tags:[minimumPayoutAmount:decimals]
+    /// @param maximumPayoutAmount The maximum amount of tokens the Bounty will pay out upon being claimed tags:[maximumPayoutAmount:decimals]
+    /// @param details The Bounty's details. tags:[details:any]
     /// @return bountyId The newly added Bounty's id.
-    /// @custom:tags minimumPayoutAmount:decimal maximumPayoutAmount:decimal details:any(string)
     function addBounty(
         uint minimumPayoutAmount,
         uint maximumPayoutAmount,
@@ -203,8 +200,7 @@ interface IBountyManager is IERC20PaymentClient {
     /// @notice Updates a Bounty's informations.
     /// @dev Reverts if an argument invalid.
     /// @param bountyId The id of the Bounty that will be updated.
-    /// @param details The Bounty's details.
-    /// @custom:tags details:any(string)
+    /// @param details The Bounty's details. tags:[details:any]
     function updateBounty(uint bountyId, bytes calldata details) external;
 
     /// @notice Locks the Bounty so it cant be claimed.
@@ -215,10 +211,9 @@ interface IBountyManager is IERC20PaymentClient {
 
     /// @notice Adds a new Claim.
     /// @dev Reverts if an argument invalid.
-    /// @param contributors The contributor information for the Claim
-    /// @param details The Claim's details.
+    /// @param contributors The contributor information for the Claim tags:[claimAmount:decimals]
+    /// @param details The Claim's details. tags:[details:any]
     /// @return claimId The newly added Claim's id.
-    /// @custom:tags claimAmount:decimal details:any(string)
     function addClaim(
         uint bountyId,
         Contributor[] calldata contributors,
@@ -228,8 +223,7 @@ interface IBountyManager is IERC20PaymentClient {
     /// @notice Updates a Claim's contributor informations.
     /// @dev Reverts if an argument invalid.
     /// @param claimId The id of the Claim that will be updated.
-    /// @param contributors The contributor information for the Claim.
-    /// @custom:tags claimAmount:decimal
+    /// @param contributors The contributor information for the Claim. tags:[claimAmount:decimals]
     function updateClaimContributors(
         uint claimId,
         Contributor[] calldata contributors
@@ -237,8 +231,7 @@ interface IBountyManager is IERC20PaymentClient {
 
     /// @notice Updates a Claim Details.
     /// @param claimId The id of the Claim that will be updated.
-    /// @param details The Claim's details.
-    /// @custom:tags details:any(string)
+    /// @param details The Claim's details. tags:[details:any]
     function updateClaimDetails(uint claimId, bytes calldata details)
         external;
 
@@ -247,8 +240,7 @@ interface IBountyManager is IERC20PaymentClient {
     /// @dev Reverts if id invalid.
     /// @dev contributors should be copied out of the given Claim. The parameter is used to prevent front running.
     /// @param claimId The id of the Claim that wants to claim the Bounty.
-    /// @param contributors The contributor information for the Claim.
-    /// @custom:tags claimAmount:decimal
+    /// @param contributors The contributor information for the Claim. tags:[claimAmount:decimals]
     function verifyClaim(uint claimId, Contributor[] calldata contributors)
         external;
 }
