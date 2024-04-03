@@ -19,7 +19,7 @@ import {IRebasingERC20} from
     "src/modules/fundingManager/token/IRebasingERC20.sol";
 
 // External Libraries
-import {SafeERC20} from "@oz/token/ERC20/utils/SafeERC20.sol";
+import {SafeERC20} from "src/external/libraries/SafeERC20.sol";
 import {Strings} from "@oz/utils/Strings.sol";
 
 import {IFundingManager} from "src/modules/fundingManager/IFundingManager.sol";

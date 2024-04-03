@@ -2,7 +2,7 @@
 pragma solidity 0.8.23;
 
 // External Libraries
-import {SafeERC20} from "@oz/token/ERC20/utils/SafeERC20.sol";
+import {SafeERC20} from "src/external/libraries/SafeERC20.sol";
 
 // External Interfaces
 import {IERC20} from "src/external/interfaces/IERC20.sol";

@@ -19,7 +19,7 @@ import {ERC20Upgradeable} from "@oz-up/token/ERC20/ERC20Upgradeable.sol";
 import {ContextUpgradeable} from "@oz-up/utils/ContextUpgradeable.sol";
 
 // External Libraries
-import {SafeERC20} from "@oz/token/ERC20/utils/SafeERC20.sol";
+import {SafeERC20} from "src/external/libraries/SafeERC20.sol";
 
 /// @title Bonding Curve Funding Manager Base Contract.
 /// @author Inverter Network.

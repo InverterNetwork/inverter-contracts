@@ -1,13 +1,16 @@
 {
-    "solidity.packageDefaultDependenciesContractsDirectory": "src",
-    "solidity.packageDefaultDependenciesDirectory": "lib",
-    "solidity.compileUsingRemoteVersion": "v0.8.19",
-    "solidity.formatter": "forge",
-    "search.exclude": {
-        "lib": true
-    },
-    "files.associations": {
-        ".gas-snapshot": "julia"
-    },
-    "editor.formatOnSave": true
+  "solidity.packageDefaultDependenciesContractsDirectory": "src",
+  "solidity.packageDefaultDependenciesDirectory": "lib",
+  "solidity.compileUsingRemoteVersion": "v0.8.19",
+  "solidity.formatter": "forge",
+  "search.exclude": {
+    "lib": true
+  },
+  "files.associations": {
+    ".gas-snapshot": "julia"
+  },
+  "editor.formatOnSave": true,
+  "[solidity]": {
+    "editor.defaultFormatter": "rmcmk.forge-format-vsc"
+  }
 }
