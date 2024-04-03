@@ -5,7 +5,7 @@ pragma solidity 0.8.23;
 import {SafeERC20} from "@oz/token/ERC20/utils/SafeERC20.sol";
 
 // External Interfaces
-import {IERC20} from "@oz/token/ERC20/IERC20.sol";
+import {IERC20} from "src/external/interfaces/IERC20.sol";
 
 // Internal Dependencies
 import {Module, ContextUpgradeable} from "src/modules/base/Module.sol";

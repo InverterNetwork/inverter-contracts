@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 // External Interfaces
-import {IERC20} from "@oz/token/ERC20/IERC20.sol";
+import {IERC20} from "src/external/interfaces/IERC20.sol";
 
 // Internal Dependencies
 import {Module, IModule, IOrchestrator} from "src/modules/base/Module.sol";

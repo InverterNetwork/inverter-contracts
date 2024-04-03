@@ -12,7 +12,7 @@ import {Module} from "src/modules/base/Module.sol";
 import {ERC20} from "@oz/token/ERC20/ERC20.sol";
 
 // Interfaces
-import {IERC20} from "@oz/token/ERC20/IERC20.sol";
+import {IERC20} from "src/external/interfaces/IERC20.sol";
 import {IOrchestrator} from "src/orchestrator/IOrchestrator.sol";
 
 /**

@@ -13,8 +13,8 @@ import {Initializable} from "@oz-up/proxy/utils/Initializable.sol";
 import {IOrchestrator} from "src/orchestrator/IOrchestrator.sol";
 
 // External Interfaces
-import {IERC20} from "@oz/token/ERC20/IERC20.sol";
-import {IERC20Metadata} from "@oz/token/ERC20/extensions/IERC20Metadata.sol";
+import {IERC20} from "src/external/interfaces/IERC20.sol";
+import {IERC20Metadata} from "src/external/interfaces/IERC20Metadata.sol";
 import {IRebasingERC20} from
     "src/modules/fundingManager/token/IRebasingERC20.sol";
 

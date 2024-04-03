@@ -11,8 +11,8 @@ import {IBondingCurveFundingManagerBase} from
 import {IOrchestrator} from "src/orchestrator/IOrchestrator.sol";
 
 // External Interfaces
-import {IERC20} from "@oz/token/ERC20/IERC20.sol";
-import {IERC20Metadata} from "@oz/token/ERC20/extensions/IERC20Metadata.sol";
+import {IERC20} from "src/external/interfaces/IERC20.sol";
+import {IERC20Metadata} from "src/external/interfaces/IERC20Metadata.sol";
 
 // External Dependencies
 import {ERC20Upgradeable} from "@oz-up/token/ERC20/ERC20Upgradeable.sol";

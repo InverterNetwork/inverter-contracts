@@ -20,7 +20,7 @@ import {IBancorFormula} from
 import {Module} from "src/modules/base/Module.sol";
 import {IFundingManager} from "src/modules/fundingManager/IFundingManager.sol";
 // External Interfaces
-import {IERC20} from "@oz/token/ERC20/IERC20.sol";
+import {IERC20} from "src/external/interfaces/IERC20.sol";
 
 contract RedeemingBondingCurveFundingManagerMock is
     RedeemingBondingCurveFundingManagerBase

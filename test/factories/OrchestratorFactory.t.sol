@@ -7,7 +7,7 @@ import "forge-std/Test.sol";
 import {OrchestratorFactory} from "src/factories/OrchestratorFactory.sol";
 
 // External Interfaces
-import {IERC20} from "@oz/token/ERC20/IERC20.sol";
+import {IERC20} from "src/external/interfaces/IERC20.sol";
 
 // Internal Interfaces
 import {

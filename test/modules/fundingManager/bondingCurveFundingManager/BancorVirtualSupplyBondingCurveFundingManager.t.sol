@@ -16,9 +16,9 @@ import {Clones} from "@oz/proxy/Clones.sol";
 
 import {IERC165} from "@oz/utils/introspection/IERC165.sol";
 
-// import {IERC20} from "@oz/token/ERC20/IERC20.sol";
+// import {IERC20} from "src/external/interfaces/IERC20.sol";
 // import {IERC20Metadata} from
-//     "@oz/token/ERC20/extensions/IERC20Metadata.sol";
+//     "src/external/interfaces/IERC20Metadata.sol";
 
 // Internal Dependencies
 import {ModuleTest, IModule, IOrchestrator} from "test/modules/ModuleTest.sol";
@@ -310,9 +310,8 @@ contract BancorVirtualSupplyBondingCurveFundingManagerTest is ModuleTest {
 
         vm.startPrank(buyer);
         {
-            vm.expectRevert(
-                // This results in an overflow of the bonding curve math
-            );
+            vm.expectRevert();
+            // This results in an overflow of the bonding curve math
             bondingCurveFundingManager.buy(amount, amount);
         }
         vm.stopPrank();
@@ -336,9 +335,8 @@ contract BancorVirtualSupplyBondingCurveFundingManagerTest is ModuleTest {
 
         vm.startPrank(buyer);
         {
-            vm.expectRevert(
-                // This results in an overflow of the bonding curve math
-            );
+            vm.expectRevert();
+            // This results in an overflow of the bonding curve math
             bondingCurveFundingManager.buy(amount, amount);
         }
         vm.stopPrank();
@@ -892,6 +890,7 @@ contract BancorVirtualSupplyBondingCurveFundingManagerTest is ModuleTest {
             bondingCurveFundingManager.call_reserveRatioForBuying()
         );
     }
+
     /*
         Test getReserveRatioForSelling()
     */
@@ -915,6 +914,7 @@ contract BancorVirtualSupplyBondingCurveFundingManagerTest is ModuleTest {
             bondingCurveFundingManager.getStaticPriceForBuying(), returnValue
         );
     }
+
     /* Test getStaticPriceForSelling() */
 
     function testgetStaticPriceForSelling() public {
@@ -975,7 +975,7 @@ contract BancorVirtualSupplyBondingCurveFundingManagerTest is ModuleTest {
         uint _bps = bondingCurveFundingManager.call_BPS();
 
         _fee = bound(_fee, 1, (_bps - 1)); // 100% buy fees are not allowed.
-            // Above an amount of 1e38 the BancorFormula starts to revert.
+        // Above an amount of 1e38 the BancorFormula starts to revert.
         _depositAmount = bound(_depositAmount, 1, 1e38);
 
         vm.prank(owner_address);
@@ -1059,7 +1059,7 @@ contract BancorVirtualSupplyBondingCurveFundingManagerTest is ModuleTest {
         uint _bps = bondingCurveFundingManager.call_BPS();
 
         _fee = bound(_fee, 1, (_bps - 1)); // 100% buy fees are not allowed.
-            // Above an amount of 1e26 the BancorFormula starts to revert.
+        // Above an amount of 1e26 the BancorFormula starts to revert.
         _depositAmount = bound(_depositAmount, 1, 1e26);
 
         // Set sell Fee
@@ -1535,6 +1535,7 @@ contract BancorVirtualSupplyBondingCurveFundingManagerTest is ModuleTest {
         uint factor = _requiredDecimals - _tokenDecimals;
         assertEq((res % (10 ** factor)), 0);
     }
+
     //--------------------------------------------------------------------------
     // OnlyOrchestrator Mutating Functions
 

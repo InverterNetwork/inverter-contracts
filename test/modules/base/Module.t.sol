@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 // External Libraries
 import {Clones} from "@oz/proxy/Clones.sol";
 
-import {IERC20} from "@oz/token/ERC20/IERC20.sol";
+import {IERC20} from "src/external/interfaces/IERC20.sol";
 
 import {IERC165} from "@oz/utils/introspection/IERC165.sol";
 
