@@ -7,6 +7,7 @@ import "forge-std/Script.sol";
 
 import {IModule_v1} from "src/modules/base/IModule_v1.sol";
 import {IModuleFactory_v1} from "src/factories/ModuleFactory_v1.sol";
+import {IInverterBeacon_v1} from "src/proxies/interfaces/IInverterBeacon_v1.sol";
 
 // Import scripts:
 import {DeployAndSetUpInverterBeacon_v1} from
@@ -30,16 +31,20 @@ import {DeployFM_Rebasing_v1} from
     "script/modules/fundingManager/DeployFM_Rebasing_v1.s.sol";
 import {DeployFM_BC_Bancor_Redeeming_VirtualSupply_v1} from
     "script/modules/fundingManager/DeployFM_BC_Bancor_Redeeming_VirtualSupply_v1.s.sol";
+import {DeployFM_BC_Restricted_Bancor_Redeeming_VirtualSupply_v1} from
+    "script/modules/fundingManager/DeployFM_BC_Restricted_Bancor_Redeeming_VirtualSupply_v1.s.sol";
 import {DeployAUT_Role_v1} from
     "script/modules/authorizer/DeployAUT_Role_v1.s.sol";
-import {DeployFM_BC_Bancor_Redeeming_VirtualSupply_v1} from
-    "script/modules/fundingManager/DeployFM_BC_Bancor_Redeeming_VirtualSupply_v1.s.sol";
 import {DeployAUT_TokenGated_Role_v1} from
     "script/modules/authorizer/DeployAUT_TokenGated_Role_v1.s.sol";
 import {DeployPP_Streaming_v1} from
     "script/modules/paymentProcessor/DeployPP_Streaming_v1.s.sol";
 import {DeployLM_PC_RecurringPayments_v1} from
     "script/modules/logicModule/DeployLM_PC_RecurringPayments_v1.s.sol";
+import {DeployLM_PC_PaymentRouter_v1} from
+    "script/modules/logicModule/DeployLM_PC_PaymentRouter_v1.s.sol";
+import {DeployLM_PC_KPIRewarder_v1} from
+    "script/modules/logicModule/DeployLM_PC_KPIRewarder.s.sol";
 import {DeployAUT_EXT_VotingRoles_v1} from
     "script/modules/authorizer/extensions/DeployAUT_EXT_VotingRoles_v1.s.sol";
 
@@ -63,6 +68,9 @@ contract DeploymentScript is Script {
     DeployFM_BC_Bancor_Redeeming_VirtualSupply_v1
         deployBancorVirtualSupplyBondingCurveFundingManager =
             new DeployFM_BC_Bancor_Redeeming_VirtualSupply_v1();
+    DeployFM_BC_Restricted_Bancor_Redeeming_VirtualSupply_v1
+        deployRestrictedBancorVirtualSupplyBondingCurveFundingManager =
+            new DeployFM_BC_Restricted_Bancor_Redeeming_VirtualSupply_v1();
     // Authorizer
     DeployAUT_Role_v1 deployRoleAuthorizer = new DeployAUT_Role_v1();
     DeployAUT_TokenGated_Role_v1 deployTokenGatedRoleAuthorizer =
@@ -75,6 +83,10 @@ contract DeploymentScript is Script {
     DeployLM_PC_Bounties_v1 deployBountyManager = new DeployLM_PC_Bounties_v1();
     DeployLM_PC_RecurringPayments_v1 deployRecurringPaymentManager =
         new DeployLM_PC_RecurringPayments_v1();
+    DeployLM_PC_PaymentRouter_v1 deployPaymentRouter =
+        new DeployLM_PC_PaymentRouter_v1();
+    DeployLM_PC_KPIRewarder_v1 deployKPIRewarder =
+        new DeployLM_PC_KPIRewarder_v1();
     // Utils
     DeployAUT_EXT_VotingRoles_v1 deploySingleVoteGovernor =
         new DeployAUT_EXT_VotingRoles_v1();
@@ -103,6 +115,7 @@ contract DeploymentScript is Script {
     // Funding Manager
     address rebasingFundingManager;
     address bancorBondingCurveFundingManager;
+    address restrictedBancorVirtualSupplyBondingCurveFundingManager;
     // Authorizer
     address roleAuthorizer;
     address tokenGatedRoleAuthorizer;
@@ -112,6 +125,8 @@ contract DeploymentScript is Script {
     // Logic Module
     address bountyManager;
     address recurringPaymentManager;
+    address paymentRouter;
+    address kpiRewarder;
     // Utils
     address singleVoteGovernor;
 
@@ -123,6 +138,7 @@ contract DeploymentScript is Script {
     // Funding Manager
     address rebasingFundingManagerBeacon;
     address bancorBondingCurveFundingManagerBeacon;
+    address restrictedBancorBondingCurveFundingManagerBeacon;
     // Authorizer
     address roleAuthorizerBeacon;
     address tokenGatedRoleAuthorizerBeacon;
@@ -132,6 +148,8 @@ contract DeploymentScript is Script {
     // Logic Module
     address bountyManagerBeacon;
     address recurringPaymentManagerBeacon;
+    address paymentRouterBeacon;
+    address kpiRewarderBeacon;
     // Utils
     address singleVoteGovernorBeacon;
 
@@ -153,6 +171,9 @@ contract DeploymentScript is Script {
     address moduleFactory;
     address orchestratorFactory;
 
+    IModule_v1.Metadata[] initialMetadataRegistration;
+    IInverterBeacon_v1[] initialBeaconRegistration;
+
     // ------------------------------------------------------------------------
     // Module Metadata
 
@@ -173,6 +194,15 @@ contract DeploymentScript is Script {
         "https://github.com/InverterNetwork/inverter-contracts",
         "FM_BC_Bancor_Redeeming_VirtualSupply_v1"
     );
+
+    IModule_v1.Metadata
+        restrictedBancorVirtualSupplyBondingCurveFundingManagerMetadata =
+        IModule_v1.Metadata(
+            1,
+            0,
+            "https://github.com/InverterNetwork/inverter-contracts",
+            "FM_BC_Restricted_Bancor_Redeeming_VirtualSupply_v1"
+        );
 
     // ------------------------------------------------------------------------
     // Authorizer
@@ -223,6 +253,20 @@ contract DeploymentScript is Script {
         0,
         "https://github.com/InverterNetwork/inverter-contracts",
         "LM_PC_Bounties_v1"
+    );
+
+    IModule_v1.Metadata paymentRouterMetadata = IModule_v1.Metadata(
+        1,
+        0,
+        "https://github.com/InverterNetwork/inverter-contracts",
+        "LM_PC_PaymentRouter_v1"
+    );
+
+    IModule_v1.Metadata kpiRewarderMetadata = IModule_v1.Metadata(
+        1,
+        0,
+        "https://github.com/InverterNetwork/inverter-contracts",
+        "LM_PC_KPIRewarder_v1"
     );
 
     // ------------------------------------------------------------------------
@@ -287,26 +331,15 @@ contract DeploymentScript is Script {
 
         // Deploy beacon and actual proxy
         (forwarderBeacon, forwarder) = deployAndSetupInverterBeacon_v1
-            .deployBeaconAndSetupProxy(deployer, forwarderImplementation, 1, 0);
+            .deployBeaconAndSetupProxy(
+            address(governor), forwarderImplementation, 1, 0
+        );
 
         if (
             forwarder == forwarderImplementation || forwarder == forwarderBeacon
         ) {
             revert BeaconProxyDeploymentFailed();
         }
-
-        console2.log(
-            "-----------------------------------------------------------------------------"
-        );
-        console2.log("Deploy factory implementations \n");
-
-        // Deploy module factory v1 implementation
-        moduleFactory = deployModuleFactory.run(deployer, forwarder);
-
-        // Deploy orchestrator Factory implementation
-        orchestratorFactory = deployOrchestratorFactory.run(
-            deployer, orchestrator, moduleFactory, forwarder
-        );
 
         console2.log(
             "-----------------------------------------------------------------------------"
@@ -318,6 +351,8 @@ contract DeploymentScript is Script {
         rebasingFundingManager = deployRebasingFundingManager.run();
         bancorBondingCurveFundingManager =
             deployBancorVirtualSupplyBondingCurveFundingManager.run();
+        restrictedBancorVirtualSupplyBondingCurveFundingManager =
+            deployRestrictedBancorVirtualSupplyBondingCurveFundingManager.run();
         // Authorizer
         roleAuthorizer = deployRoleAuthorizer.run();
         tokenGatedRoleAuthorizer = deployTokenGatedRoleAuthorizer.run();
@@ -327,6 +362,8 @@ contract DeploymentScript is Script {
         // Logic Module
         bountyManager = deployBountyManager.run();
         recurringPaymentManager = deployRecurringPaymentManager.run();
+        paymentRouter = deployPaymentRouter.run();
+        kpiRewarder = deployKPIRewarder.run();
         // Utils
         singleVoteGovernor = deploySingleVoteGovernor.run();
 
@@ -336,107 +373,177 @@ contract DeploymentScript is Script {
         console2.log(
             "Deploy module beacons and register in module factory v1 \n"
         );
-        // Deploy Modules and Register in factories
+        // Deploy Modules and fill the intitial init list
 
         // Funding Manager
-        rebasingFundingManagerBeacon = deployAndSetupInverterBeacon_v1
-            .deployAndRegisterInFactory(
-            deployer,
-            rebasingFundingManager,
-            moduleFactory,
-            rebasingFundingManagerMetadata
+
+        initialMetadataRegistration.push(rebasingFundingManagerMetadata);
+        initialBeaconRegistration.push(
+            IInverterBeacon_v1(
+                deployAndSetupInverterBeacon_v1.deployInverterBeacon(
+                    address(governor),
+                    rebasingFundingManager,
+                    rebasingFundingManagerMetadata.majorVersion,
+                    rebasingFundingManagerMetadata.minorVersion
+                )
+            )
         );
-        bancorBondingCurveFundingManagerBeacon = deployAndSetupInverterBeacon_v1
-            .deployAndRegisterInFactory(
-            deployer,
-            bancorBondingCurveFundingManager,
-            moduleFactory,
+        initialMetadataRegistration.push(
             bancorVirtualSupplyBondingCurveFundingManagerMetadata
         );
-        // Authorizer
-        roleAuthorizerBeacon = deployAndSetupInverterBeacon_v1
-            .deployAndRegisterInFactory(
-            deployer, roleAuthorizer, moduleFactory, roleAuthorizerMetadata
+        initialBeaconRegistration.push(
+            IInverterBeacon_v1(
+                deployAndSetupInverterBeacon_v1.deployInverterBeacon(
+                    address(governor),
+                    bancorBondingCurveFundingManager,
+                    bancorVirtualSupplyBondingCurveFundingManagerMetadata
+                        .majorVersion,
+                    bancorVirtualSupplyBondingCurveFundingManagerMetadata
+                        .minorVersion
+                )
+            )
         );
-        tokenGatedRoleAuthorizerBeacon = deployAndSetupInverterBeacon_v1
-            .deployAndRegisterInFactory(
-            deployer,
-            tokenGatedRoleAuthorizer,
-            moduleFactory,
-            tokenGatedRoleAuthorizerMetadata
-        );
-        // Payment Processor
-        simplePaymentProcessorBeacon = deployAndSetupInverterBeacon_v1
-            .deployAndRegisterInFactory(
-            deployer,
-            simplePaymentProcessor,
-            moduleFactory,
-            simplePaymentProcessorMetadata
-        );
-        streamingPaymentProcessorBeacon = deployAndSetupInverterBeacon_v1
-            .deployAndRegisterInFactory(
-            deployer,
-            streamingPaymentProcessor,
-            moduleFactory,
-            streamingPaymentProcessorMetadata
-        );
-        // Logic Module
-        bountyManagerBeacon = deployAndSetupInverterBeacon_v1
-            .deployAndRegisterInFactory(
-            deployer, bountyManager, moduleFactory, bountyManagerMetadata
-        );
-        recurringPaymentManagerBeacon = deployAndSetupInverterBeacon_v1
-            .deployAndRegisterInFactory(
-            deployer,
-            recurringPaymentManager,
-            moduleFactory,
-            recurringPaymentManagerMetadata
+        initialMetadataRegistration.push(
+            restrictedBancorVirtualSupplyBondingCurveFundingManagerMetadata
         );
 
-        // Utils
-        singleVoteGovernorBeacon = deployAndSetupInverterBeacon_v1
-            .deployAndRegisterInFactory(
-            deployer,
-            singleVoteGovernor,
-            moduleFactory,
-            singleVoteGovernorMetadata
+        initialBeaconRegistration.push(
+            IInverterBeacon_v1(
+                deployAndSetupInverterBeacon_v1.deployInverterBeacon(
+                    address(governor),
+                    restrictedBancorVirtualSupplyBondingCurveFundingManager,
+                    restrictedBancorVirtualSupplyBondingCurveFundingManagerMetadata
+                        .majorVersion,
+                    restrictedBancorVirtualSupplyBondingCurveFundingManagerMetadata
+                        .minorVersion
+                )
+            )
+        );
+
+        // Authorizer
+        initialMetadataRegistration.push(roleAuthorizerMetadata);
+        initialBeaconRegistration.push(
+            IInverterBeacon_v1(
+                deployAndSetupInverterBeacon_v1.deployInverterBeacon(
+                    address(governor),
+                    roleAuthorizer,
+                    roleAuthorizerMetadata.majorVersion,
+                    roleAuthorizerMetadata.minorVersion
+                )
+            )
+        );
+        initialMetadataRegistration.push(tokenGatedRoleAuthorizerMetadata);
+        initialBeaconRegistration.push(
+            IInverterBeacon_v1(
+                deployAndSetupInverterBeacon_v1.deployInverterBeacon(
+                    address(governor),
+                    tokenGatedRoleAuthorizer,
+                    tokenGatedRoleAuthorizerMetadata.majorVersion,
+                    tokenGatedRoleAuthorizerMetadata.minorVersion
+                )
+            )
+        );
+        initialMetadataRegistration.push(singleVoteGovernorMetadata);
+        initialBeaconRegistration.push(
+            IInverterBeacon_v1(
+                deployAndSetupInverterBeacon_v1.deployInverterBeacon(
+                    address(governor),
+                    singleVoteGovernor,
+                    singleVoteGovernorMetadata.majorVersion,
+                    singleVoteGovernorMetadata.minorVersion
+                )
+            )
+        );
+        // Payment Processor
+        initialMetadataRegistration.push(simplePaymentProcessorMetadata);
+        initialBeaconRegistration.push(
+            IInverterBeacon_v1(
+                deployAndSetupInverterBeacon_v1.deployInverterBeacon(
+                    address(governor),
+                    simplePaymentProcessor,
+                    simplePaymentProcessorMetadata.majorVersion,
+                    simplePaymentProcessorMetadata.minorVersion
+                )
+            )
+        );
+        initialMetadataRegistration.push(streamingPaymentProcessorMetadata);
+        initialBeaconRegistration.push(
+            IInverterBeacon_v1(
+                deployAndSetupInverterBeacon_v1.deployInverterBeacon(
+                    address(governor),
+                    streamingPaymentProcessor,
+                    streamingPaymentProcessorMetadata.majorVersion,
+                    streamingPaymentProcessorMetadata.minorVersion
+                )
+            )
+        );
+        // Logic Module
+        initialMetadataRegistration.push(bountyManagerMetadata);
+        initialBeaconRegistration.push(
+            IInverterBeacon_v1(
+                deployAndSetupInverterBeacon_v1.deployInverterBeacon(
+                    address(governor),
+                    bountyManager,
+                    bountyManagerMetadata.majorVersion,
+                    bountyManagerMetadata.minorVersion
+                )
+            )
+        );
+        initialMetadataRegistration.push(recurringPaymentManagerMetadata);
+        initialBeaconRegistration.push(
+            IInverterBeacon_v1(
+                deployAndSetupInverterBeacon_v1.deployInverterBeacon(
+                    address(governor),
+                    recurringPaymentManager,
+                    recurringPaymentManagerMetadata.majorVersion,
+                    recurringPaymentManagerMetadata.minorVersion
+                )
+            )
+        );
+        initialMetadataRegistration.push(kpiRewarderMetadata);
+        initialBeaconRegistration.push(
+            IInverterBeacon_v1(
+                deployAndSetupInverterBeacon_v1.deployInverterBeacon(
+                    address(governor),
+                    kpiRewarder,
+                    kpiRewarderMetadata.majorVersion,
+                    kpiRewarderMetadata.minorVersion
+                )
+            )
+        );
+        initialMetadataRegistration.push(paymentRouterMetadata);
+        initialBeaconRegistration.push(
+            IInverterBeacon_v1(
+                deployAndSetupInverterBeacon_v1.deployInverterBeacon(
+                    address(governor),
+                    paymentRouter,
+                    paymentRouterMetadata.majorVersion,
+                    paymentRouterMetadata.minorVersion
+                )
+            )
         );
 
         console2.log(
             "-----------------------------------------------------------------------------"
         );
+        console2.log("Deploy factory implementations \n");
 
-        // Transfer Ownership of all contracts
+        // Deploy module factory v1 implementation
+        moduleFactory = deployModuleFactory.run(
+            address(governor),
+            forwarder,
+            initialMetadataRegistration,
+            initialBeaconRegistration
+        );
 
-        vm.startBroadcast(deployerPrivateKey);
-        {
-            Ownable2Step(rebasingFundingManagerBeacon).transferOwnership(
-                governor
-            );
-            Ownable2Step(bancorBondingCurveFundingManagerBeacon)
-                .transferOwnership(governor);
-            Ownable2Step(roleAuthorizerBeacon).transferOwnership(governor);
-            Ownable2Step(tokenGatedRoleAuthorizerBeacon).transferOwnership(
-                governor
-            );
-            Ownable2Step(simplePaymentProcessorBeacon).transferOwnership(
-                governor
-            );
-            Ownable2Step(streamingPaymentProcessorBeacon).transferOwnership(
-                governor
-            );
-            Ownable2Step(bountyManagerBeacon).transferOwnership(governor);
-            Ownable2Step(recurringPaymentManagerBeacon).transferOwnership(
-                governor
-            );
-            Ownable2Step(singleVoteGovernorBeacon).transferOwnership(governor);
+        // Deploy orchestrator Factory implementation
+        orchestratorFactory = deployOrchestratorFactory.run(
+            address(governor), orchestrator, moduleFactory, forwarder
+        );
 
-            Ownable2Step(orchestratorFactory).transferOwnership(governor);
-            Ownable2Step(moduleFactory).transferOwnership(governor);
-        }
-        vm.stopBroadcast();
-
-        console2.log("Transferred ownership of all contract to Governor \n");
+        console2.log(
+            "-----------------------------------------------------------------------------"
+        );
 
         return (orchestratorFactory);
     }
