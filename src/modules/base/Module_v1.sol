@@ -72,6 +72,9 @@ abstract contract Module_v1 is
     /// @custom:invariant Not mutated after initialization.
     Metadata internal __Module_metadata;
 
+    // Storage gap for future upgrades
+    uint[50] private __gap;
+
     //--------------------------------------------------------------------------
     // Modifiers
     //
@@ -275,6 +278,7 @@ abstract contract Module_v1 is
     /// @return treasury The address of the treasury
     function _getFeeManagerCollateralFeeData(bytes4 functionSelector)
         internal
+        view
         returns (uint fee, address treasury)
     {
         //Fetch fee manager address from orchestrator
@@ -293,6 +297,7 @@ abstract contract Module_v1 is
     /// @return treasury The address of the treasury
     function _getFeeManagerIssuanceFeeData(bytes4 functionSelector)
         internal
+        view
         returns (uint fee, address treasury)
     {
         //Fetch fee manager address from orchestrator

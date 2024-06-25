@@ -8,7 +8,7 @@ import {SafeERC20} from "@oz/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@oz/token/ERC20/IERC20.sol";
 
 // Internal Dependencies
-import {Module_v1, ContextUpgradeable} from "src/modules/base/Module_v1.sol";
+import {Module_v1} from "src/modules/base/Module_v1.sol";
 import {
     IERC20PaymentClientBase_v1,
     IPaymentProcessor_v1
@@ -72,6 +72,9 @@ abstract contract ERC20PaymentClientBase_v1 is
 
     /// @dev The current cumulative amount of tokens outstanding.
     uint internal _outstandingTokenAmount;
+
+    // Storage gap for future upgrades
+    uint[50] private __gap;
 
     //--------------------------------------------------------------------------
     // Internal Mutating Functions

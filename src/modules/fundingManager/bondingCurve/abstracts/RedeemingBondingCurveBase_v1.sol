@@ -54,11 +54,14 @@ abstract contract RedeemingBondingCurveBase_v1 is
     /// @dev Sell fee expressed in base points, i.e. 0% = 0; 1% = 100; 10% = 1000
     uint public sellFee;
 
+    // Storage gap for future upgrades
+    uint[50] private __gap;
+
     //--------------------------------------------------------------------------
     // Modifiers
 
     modifier sellingIsEnabled() {
-        if (sellIsOpen == false) {
+        if (!sellIsOpen) {
             revert
                 Module__RedeemingBondingCurveBase__SellingFunctionaltiesClosed();
         }
@@ -118,7 +121,7 @@ abstract contract RedeemingBondingCurveBase_v1 is
     // Public Functions Implemented in Downstream Contract
 
     /// @inheritdoc IRedeemingBondingCurveBase_v1
-    function getStaticPriceForSelling() external virtual returns (uint);
+    function getStaticPriceForSelling() external view virtual returns (uint);
 
     //--------------------------------------------------------------------------
     // Internal Functions Implemented in Downstream Contract
@@ -182,8 +185,6 @@ abstract contract RedeemingBondingCurveBase_v1 is
 
         issuanceFeeAmount = protocolFeeAmount;
 
-        // Process the protocol fee
-        _processProtocolFeeViaMinting(issuanceTreasury, protocolFeeAmount);
         // Calculate redeem amount based on upstream formula
         uint collateralRedeemAmount = _redeemTokensFormulaWrapper(netDeposit);
 
@@ -192,12 +193,16 @@ abstract contract RedeemingBondingCurveBase_v1 is
         // Burn issued token from user
         _burn(_msgSender(), _depositAmount);
 
+        // Process the protocol fee. We can re-mint some of the burned tokens, since we aren't paying out the backing collateral
+        _processProtocolFeeViaMinting(issuanceTreasury, protocolFeeAmount);
+
+        // Cache Collateral Token
+        IERC20 collateralToken = __Module_orchestrator.fundingManager().token();
+
         // Require that enough collateral token is held to be redeemable
         if (
             (collateralRedeemAmount + projectCollateralFeeCollected)
-                > __Module_orchestrator.fundingManager().token().balanceOf(
-                    address(this)
-                )
+                > collateralToken.balanceOf(address(this))
         ) {
             revert
                 Module__RedeemingBondingCurveBase__InsufficientCollateralForRedemption(
@@ -211,9 +216,7 @@ abstract contract RedeemingBondingCurveBase_v1 is
         );
         // Process the protocol fee
         _processProtocolFeeViaTransfer(
-            collateralreasury,
-            __Module_orchestrator.fundingManager().token(),
-            protocolFeeAmount
+            collateralreasury, collateralToken, protocolFeeAmount
         );
 
         // Add workflow fee if applicable
@@ -226,9 +229,7 @@ abstract contract RedeemingBondingCurveBase_v1 is
             revert Module__RedeemingBondingCurveBase__InsufficientOutputAmount();
         }
         // Transfer tokens to receiver
-        __Module_orchestrator.fundingManager().token().transfer(
-            _receiver, collateralRedeemAmount
-        );
+        collateralToken.transfer(_receiver, collateralRedeemAmount);
         // Emit event
         emit TokensSold(
             _receiver, _depositAmount, collateralRedeemAmount, _msgSender()
@@ -237,7 +238,7 @@ abstract contract RedeemingBondingCurveBase_v1 is
 
     /// @dev Opens the sell functionality by setting the state variable `sellIsOpen` to true.
     function _openSell() internal virtual {
-        if (sellIsOpen == true) {
+        if (sellIsOpen) {
             revert Module__RedeemingBondingCurveBase__SellingAlreadyOpen();
         }
         sellIsOpen = true;
@@ -246,7 +247,7 @@ abstract contract RedeemingBondingCurveBase_v1 is
 
     /// @dev Closes the sell functionality by setting the state variable `sellIsOpen` to false.
     function _closeSell() internal virtual {
-        if (sellIsOpen == false) {
+        if (!sellIsOpen) {
             revert Module__RedeemingBondingCurveBase__SellingAlreadyClosed();
         }
         sellIsOpen = false;
@@ -273,6 +274,7 @@ abstract contract RedeemingBondingCurveBase_v1 is
     ///     being deposited, expressed in BPS
     function _getSellFeesAndTreasuryAddresses()
         internal
+        view
         virtual
         returns (
             address collateralTreasury,
@@ -297,6 +299,7 @@ abstract contract RedeemingBondingCurveBase_v1 is
     /// @return redeemAmount The amount of collateral that will be redeemed as a result of the deposit.
     function _calculateSaleReturn(uint _depositAmount)
         internal
+        view
         virtual
         returns (uint redeemAmount)
     {
