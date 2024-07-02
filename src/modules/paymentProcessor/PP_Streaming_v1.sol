@@ -44,6 +44,7 @@ contract PP_Streaming_v1 is Module_v1, IPP_Streaming_v1 {
         returns (bool)
     {
         return interfaceId == type(IPP_Streaming_v1).interfaceId
+            || interfaceId == type(IPaymentProcessor_v1).interfaceId
             || super.supportsInterface(interfaceId);
     }
 
@@ -77,6 +78,9 @@ contract PP_Streaming_v1 is Module_v1, IPP_Streaming_v1 {
     /// @notice list of walletIDs of all payment orders of a particular paymentReceiver for a particular paymentClient
     /// @dev client => paymentReceiver => arrayOfWalletIdsWithPendingPayment(uint[])
     mapping(address => mapping(address => uint[])) private activeVestingWallets;
+
+    // Storage gap for future upgrades
+    uint[50] private __gap;
 
     //--------------------------------------------------------------------------
     // Modifiers
@@ -121,17 +125,22 @@ contract PP_Streaming_v1 is Module_v1, IPP_Streaming_v1 {
     /// @inheritdoc IPP_Streaming_v1
     function claimAll(address client) external {
         if (activeVestingWallets[client][_msgSender()].length == 0) {
-            revert Module__PP_Streaming__NothingToClaim(client, _msgSender());
+            revert Module__PaymentProcessor__NothingToClaim(
+                client, _msgSender()
+            );
         }
 
         _claimAll(client, _msgSender());
     }
 
+    /// @inheritdoc IPP_Streaming_v1
     function claimPreviouslyUnclaimable(address client, address receiver)
         external
     {
         if (unclaimable(client, _msgSender()) == 0) {
-            revert Module__PP_Streaming__NothingToClaim(client, _msgSender());
+            revert Module__PaymentProcessor__NothingToClaim(
+                client, _msgSender()
+            );
         }
 
         _claimPreviouslyUnclaimable(client, receiver);
@@ -610,6 +619,7 @@ contract PP_Streaming_v1 is Module_v1, IPP_Streaming_v1 {
         uint _dueTo,
         uint _walletId
     ) internal {
+        ++numVestingWallets[client][_paymentReceiver];
         if (
             !validAddress(_paymentReceiver) || !validSalary(_salary)
                 || !validStart(_start)
@@ -618,8 +628,6 @@ contract PP_Streaming_v1 is Module_v1, IPP_Streaming_v1 {
                 _paymentReceiver, _salary, _start, _dueTo
             );
         } else {
-            ++numVestingWallets[client][_paymentReceiver];
-
             vestings[client][_paymentReceiver][_walletId] =
                 VestingWallet(_salary, 0, _start, _dueTo, _walletId);
 

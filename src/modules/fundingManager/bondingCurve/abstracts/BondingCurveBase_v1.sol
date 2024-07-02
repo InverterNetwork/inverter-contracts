@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity 0.8.23;
 
-// Internal Interfaces
-import {IOrchestrator_v1} from
-    "src/orchestrator/interfaces/IOrchestrator_v1.sol";
-
 // Internal Dependencies
 import {Module_v1} from "src/modules/base/Module_v1.sol";
 import {IFundingManager_v1} from "@fm/IFundingManager_v1.sol";
@@ -41,7 +37,6 @@ abstract contract BondingCurveBase_v1 is IBondingCurveBase_v1, Module_v1 {
         returns (bool)
     {
         return interfaceId == type(IBondingCurveBase_v1).interfaceId
-            || interfaceId == type(IFundingManager_v1).interfaceId
             || super.supportsInterface(interfaceId);
     }
 
@@ -65,11 +60,14 @@ abstract contract BondingCurveBase_v1 is IBondingCurveBase_v1, Module_v1 {
     /// when engaging with the bonding curve-based funding manager. Collected in collateral
     uint public projectCollateralFeeCollected;
 
+    // Storage gap for future upgrades
+    uint[50] private __gap;
+
     //--------------------------------------------------------------------------
     // Modifiers
 
     modifier buyingIsEnabled() {
-        if (buyIsOpen == false) {
+        if (!buyIsOpen) {
             revert Module__BondingCurveBase__BuyingFunctionaltiesClosed();
         }
         _;
@@ -154,7 +152,7 @@ abstract contract BondingCurveBase_v1 is IBondingCurveBase_v1, Module_v1 {
     // Public Functions Implemented in Downstream Contract
 
     /// @inheritdoc IBondingCurveBase_v1
-    function getStaticPriceForBuying() external virtual returns (uint);
+    function getStaticPriceForBuying() external view virtual returns (uint);
 
     //--------------------------------------------------------------------------
     // Internal Functions Implemented in Downstream Contract
@@ -192,8 +190,12 @@ abstract contract BondingCurveBase_v1 is IBondingCurveBase_v1, Module_v1 {
         if (_depositAmount == 0) {
             revert Module__BondingCurveBase__InvalidDepositAmount();
         }
+
+        // Cache Collateral Token
+        IERC20 collateralToken = __Module_orchestrator.fundingManager().token();
+
         // Transfer collateral, confirming that correct amount == allowance
-        __Module_orchestrator.fundingManager().token().safeTransferFrom(
+        collateralToken.safeTransferFrom(
             _msgSender(), address(this), _depositAmount
         );
         // Get protocol fee percentages and treasury addresses
@@ -218,9 +220,7 @@ abstract contract BondingCurveBase_v1 is IBondingCurveBase_v1, Module_v1 {
 
         // Process the protocol fee
         _processProtocolFeeViaTransfer(
-            collateralTreasury,
-            __Module_orchestrator.fundingManager().token(),
-            protocolFeeAmount
+            collateralTreasury, collateralToken, protocolFeeAmount
         );
         // Add workflow fee if applicable
         if (workflowFeeAmount > 0) {
@@ -254,7 +254,7 @@ abstract contract BondingCurveBase_v1 is IBondingCurveBase_v1, Module_v1 {
 
     /// @dev Opens the buy functionality by setting the state variable `buyIsOpen` to true.
     function _openBuy() internal virtual {
-        if (buyIsOpen == true) {
+        if (buyIsOpen) {
             revert Module__BondingCurveBase__BuyingAlreadyOpen();
         }
         buyIsOpen = true;
@@ -263,7 +263,7 @@ abstract contract BondingCurveBase_v1 is IBondingCurveBase_v1, Module_v1 {
 
     /// @dev Closes the buy functionality by setting the state variable `buyIsOpen` to false.
     function _closeBuy() internal virtual {
-        if (buyIsOpen == false) {
+        if (!buyIsOpen) {
             revert Module__BondingCurveBase__BuyingAlreadyClosed();
         }
         buyIsOpen = false;
@@ -310,6 +310,7 @@ abstract contract BondingCurveBase_v1 is IBondingCurveBase_v1, Module_v1 {
     ///     being minted, expressed in BPS
     function _getBuyFeesAndTreasuryAddresses()
         internal
+        view
         virtual
         returns (
             address collateralTreasury,
@@ -382,6 +383,7 @@ abstract contract BondingCurveBase_v1 is IBondingCurveBase_v1, Module_v1 {
     /// @return mintAmount The amount of new tokens that will be minted as a result of the deposit.
     function _calculatePurchaseReturn(uint _depositAmount)
         internal
+        view
         virtual
         returns (uint mintAmount)
     {
